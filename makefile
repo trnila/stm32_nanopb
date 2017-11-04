@@ -68,6 +68,8 @@ DEMOS += uart_repeat_write_int
 DEMOS += rtc
 DEMOS += dac
 
+DEMOS = freertos_singlethread
+
 # List all demo folders
 DEMO_FOLDERS = $(addprefix demos/,$(DEMOS))
 
