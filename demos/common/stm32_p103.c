@@ -126,7 +126,8 @@ void init_rs232_1(void)
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     /* Configure the USART2 */
-    USART_InitStructure.USART_BaudRate = 3000000;
+//    USART_InitStructure.USART_BaudRate = 3000000;
+    USART_InitStructure.USART_BaudRate = 9600;
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;
     USART_InitStructure.USART_StopBits = USART_StopBits_1;
     USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -158,6 +159,23 @@ void enable_rs232_interrupts(void)
     /* Enable the USART2 IRQ in the NVIC module (so that the USART2 interrupt
      * handler is enabled). */
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+
+void enable_rs232_interrupts_1(void)
+{
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* Enable transmit and receive interrupts for the USART2. */
+//    USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+    /* Enable the USART2 IRQ in the NVIC module (so that the USART2 interrupt
+     * handler is enabled). */
+    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -218,7 +236,7 @@ void send_number(unsigned long sample, int radix)
 
     while(digit != 0) {
         digit--;
-        while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-        USART_SendData(USART2, str[digit]);
+        while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+        USART_SendData(USART1, str[digit]);
     }
 }

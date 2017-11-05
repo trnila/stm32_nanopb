@@ -204,7 +204,7 @@ demos/c_mem_model/main.elf: $(COMMON_FILES)
 
 
 demos/freertos_singlethread/main.elf: demos/freertos_singlethread/main.c
-demos/freertos_singlethread/main.elf: $(COMMON_FILES)
+demos/freertos_singlethread/main.elf: $(COMMON_FILES) demos/freertos_singlethread/printf-stdarg.c
 demos/freertos_singlethread/main.elf: $(FREE_RTOS_SRC_FILES)
 demos/freertos_singlethread/main.elf: $(FREE_RTOS_SRC)/portable/MemMang/heap_1.c
 	$(CC) $(CFLAGS_LINK) -Idemos/freertos_singlethread/ -I$(FREE_RTOS_INC) -I$(FREE_RTOS_PORT_INC) -o $@ $^
