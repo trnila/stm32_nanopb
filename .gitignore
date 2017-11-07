@@ -4,6 +4,8 @@
 *.bin
 *.elf
 *.list
+*.swp
+*.swo
 
 # Eclipse
 .project
