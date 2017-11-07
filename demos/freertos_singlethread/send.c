@@ -4,6 +4,11 @@
 #include <termios.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdio.h>
+#include "pb.h"
+#include <pb_encode.h>
+#include "messages/reverse.pb.h"
+#include <stdlib.h>
 
 #define error_message printf
 
@@ -72,46 +77,42 @@ void send_data(int fd, int type, int size, void *data) {
 	write(fd, data, size);
 }
 
-int main(){
-	//char *portname = "/dev/ttyAMA0";
+int main(int argc, char** argv) {
 	char *portname = "/dev/ttyUSB0";
 
-		int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
+	if(argc != 3) {
+		printf("Usage: %s string number\n", argv[0]);
+		return 1;
+	}
+
+	int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
 	if (fd < 0)
 	{
 		error_message ("error %d opening %s: %s", errno, portname, strerror (errno));
-		return;
+		return 0;
 	}
 
 	set_interface_attribs (fd, B9600, 0);  // set speed to 115,200 bps, 8n1 (no parity)
 	set_blocking (fd, 0);                // set no blocking
 
-//	write (fd, "hello!\n", 7);           // send 7 character greeting
-
-//	usleep ((7 + 25) * 100);             // sleep enough to transmit the 7 plus
-	// receive 25:  approx 100 uS per char transmit
-	char buf [100];
+	char buf[100];
 	int len = 0;
 	time_t start = time(NULL);
 	int i = 0;
 
-	char msg[] = "hello";
-	send_data(fd, 1234678, strlen(msg) + 1, msg);
-	return;
+
+	ReverseMsg msg = ReverseMsg_init_zero;
+	strcpy(msg.name, argv[1]);
+	msg.num = atoi(argv[2]);
+
+
+	uint8_t buffer[128];
+	pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+	if(!pb_encode(&stream, ReverseMsg_fields, &msg)) {
+		printf("Failed");
+	}
 
 	for(;;) {
-		int n = read (fd, buf, sizeof buf);  // read up to 100 characters if ready 
-		buf[n] = 0;
-	//	printf("%s", buf);
-
-		len += n;
-		i++;
-
-		if(i % 100 == 0) {
-			int elapsed = time(NULL) - start;
-			if(elapsed != 0) {
-				printf("\n%d\n", len / elapsed);
-			}
-		}
+		send_data(fd, 1234678, stream.bytes_written, buffer);
 	}
 }

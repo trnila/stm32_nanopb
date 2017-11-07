@@ -79,6 +79,8 @@ FREE_RTOS_SRC_FILES = $(FREE_RTOS_SRC)/croutine.c $(FREE_RTOS_SRC)/list.c $(FREE
 FREE_RTOS_INC = $(FREE_RTOS_SRC)/include/
 FREE_RTOS_PORT_INC = $(FREE_RTOS_SRC)/portable/GCC/ARM_CM3/
 
+NANOPB_INC = $(SRC)/libraries/nanopb
+
 # List path to demo build output files
 OUTPUT_FILES = $(addsuffix /main,$(DEMO_FOLDERS))
 ELF_FILES	= $(addsuffix .elf,$(OUTPUT_FILES))
@@ -205,9 +207,11 @@ demos/c_mem_model/main.elf: $(COMMON_FILES)
 
 demos/freertos_singlethread/main.elf: demos/freertos_singlethread/main.c
 demos/freertos_singlethread/main.elf: $(COMMON_FILES) demos/freertos_singlethread/printf-stdarg.c
+demos/freertos_singlethread/main.elf: libraries/nanopb/pb_common.c libraries/nanopb/pb_decode.c libraries/nanopb/pb_encode.c
+demos/freertos_singlethread/main.elf: demos/freertos_singlethread/messages/reverse.pb.c
 demos/freertos_singlethread/main.elf: $(FREE_RTOS_SRC_FILES)
 demos/freertos_singlethread/main.elf: $(FREE_RTOS_SRC)/portable/MemMang/heap_1.c
-	$(CC) $(CFLAGS_LINK) -Idemos/freertos_singlethread/ -I$(FREE_RTOS_INC) -I$(FREE_RTOS_PORT_INC) -o $@ $^
+	$(CC) $(CFLAGS_LINK) -Idemos/freertos_singlethread/ -I$(FREE_RTOS_INC) -I$(FREE_RTOS_PORT_INC) -I$(NANOPB_INC) -o $@ $^
 
 
 demos/freertos_multithread/main.elf: demos/freertos_multithread/main.c

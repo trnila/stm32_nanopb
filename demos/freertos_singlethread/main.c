@@ -6,6 +6,9 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "messages/reverse.pb.h"
+#include "pb.h"
+#include "pb_decode.h"
 
 
 int printf(const char *format, ...);
@@ -59,6 +62,9 @@ void uart_task(void *param) {
 }
 
 void uart_1_task(void *param) {
+	
+
+
 	for(;;) {
 		char input;
 		xQueueReceive(rxQueue, (void*) &input, portMAX_DELAY);
@@ -74,12 +80,16 @@ const int STATE_TYPE = 0;
 const int STATE_SIZE = 1;
 const int STATE_CONTENT = 2;
 void uart_processor(void* param) {
-	static char input[10];
+	static char input[128];
 	static char inp;
 	static char pos = 0;
 	static int val;
 	static int type, size;
 	static char state = 0;
+
+	ReverseMsg msg = ReverseMsg_init_zero;
+
+
 	for(;;) {
 		xQueueReceive(rxQueue, (void*) &inp, portMAX_DELAY);
 
@@ -104,7 +114,12 @@ void uart_processor(void* param) {
 			input[pos] = inp;
 			pos++;
 			if(pos == size) {
-				printf("content: %s\r\n", input);
+				pb_istream_t stream = pb_istream_from_buffer(input, size);
+			        if(!pb_decode(&stream, ReverseMsg_fields, &msg)) {
+					printf("err\r\n", 0);
+				}
+				printf("name: %s num: %d\r\n", msg.name, msg.num);
+//				printf("content: %s\r\n", input);
 				state = STATE_TYPE;
 				val = 0;
 				pos = 0;
